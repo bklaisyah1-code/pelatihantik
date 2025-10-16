@@ -1,18 +1,195 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Profil saya - Aisyah</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <div>
-            <img src="WhatsApp Image 2025-10-16 at 06.07.49.jpeg" alt="Foto Profil Saya">
-            <h1>Nama Lengkap Anda</h1>
-            <p>Siswa SMK yang tertarik dengan teknologi dan desain. Selamat datang di website pertama saya!</p>
-            <a href="https://www.instagram.com/usernameanda">Kunjungi Instagram saya!</a>
-            <button id="SapaButton">Sapa saya!</button>
-        </div>
-        <script src="script.js"></script>
-    </body>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Legenda Hutan Ajaib — Interaktif</title>
+  <style>
+    :root{
+      --bg:#0f1722; --card:#0b1220; --accent:#7dd3fc; --muted:#94a3b8; --text:#e6eef6;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background: radial-gradient(ellipse at top left, #071427 0%, var(--bg) 60%);
+      color:var(--text); display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;
+    }
+    .card{
+      width:100%; max-width:760px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px; box-shadow:0 6px 30px rgba(2,6,23,0.7); padding:20px;
+      border:1px solid rgba(125,211,252,0.06);
+    }
+    header{display:flex; align-items:center; gap:12px; margin-bottom:12px}
+    h1{font-size:20px; margin:0}
+    p.lead{margin:0; color:var(--muted); font-size:13px}
+    .story{background:rgba(255,255,255,0.02); padding:18px; border-radius:10px; min-height:180px; margin:14px 0; line-height:1.6}
+    .choices{display:flex; gap:10px; flex-wrap:wrap}
+    .btn{
+      background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text); padding:10px 14px; border-radius:10px;
+      cursor:pointer; font-weight:600; transition:all .15s; min-width:120px; text-align:center;
+    }
+    .btn:hover{transform:translateY(-3px); box-shadow:0 8px 20px rgba(2,6,23,0.6)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent), #60a5fa); color:#012; border:none}
+    .meta{display:flex; align-items:center; justify-content:space-between; margin-top:14px; color:var(--muted); font-size:13px}
+    @media (max-width:520px){
+      .btn{flex:1; min-width:unset}
+    }
+  </style>
+</head>
+<body>
+  <main class="card" role="application" aria-labelledby="title">
+    <header>
+      <div>
+        <h1 id="title">Legenda Hutan Ajaib</h1>
+        <p class="lead">Petualangan interaktif — pilih jalanmu, lihat akhir ceritanya.</p>
+      </div>
+    </header>
+
+    <section id="scene" class="story" aria-live="polite"></section>
+
+    <div id="choiceBox" class="choices" role="group" aria-label="Pilihan aksi"></div>
+
+    <div class="meta">
+      <div id="status">Status: Menunggu pilihan...</div>
+      <div>
+        <button id="restart" class="btn" title="Mulai ulang cerita">Restart</button>
+        <button id="auto" class="btn" title="Main otomatis (demo)">Auto</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    /* Struktur alur cerita: setiap node punya id, teks, dan pilihan (label -> id target) */
+    const nodes = {
+      start: {
+        text: `Kamu adalah Aisyah, seorang gadis yang mencari ramuan penyembuh untuk ibumu.
+Kabut tebal menyelimuti jalan. Di hadapanmu ada dua jalan bercabang.`,
+        choices: [
+          {label: "1. Jalan kiri — ke gua gelap", target: "gua"},
+          {label: "2. Jalan kanan — jalan bercahaya", target: "bercahaya"}
+        ]
+      },
+      gua: {
+        text: Kamu memasuki gua yang lembap. Suara tetesan air mengiringi langkahmu. Di sudut terlihat kotak kayu tertutup.,
+        choices: [
+          {label: "Membuka kotak", target: "peta"},
+          {label: "Mengabaikan dan terus berjalan", target: "gagal_gua"}
+        ]
+      },
+      peta: {
+        text: Di dalam kotak terdapat peta tua yang mengarah ke air terjun tersembunyi. Berbekal peta itu, kamu menemukan ramuan penyembuh.,
+        choices: [
+          {label: "Bawa pulang ramuan — Selesai", target: "selesai"}
+        ]
+      },
+      gagal_gua: {
+        text: Kamu mengabaikan kotak dan tersesat di lorong-lorong gua. Tanpa petunjuk, kamu tak menemukan ramuan dan pulang dengan tangan hampa.,
+             choices: [
+          {label: "Akhiri permainan", target: "gagal"}
+        ]
+      },
+      bercahaya: {
+        text: Di jalan bercahaya, peri kecil bersayap hijau muncul. Ia menawarkan bantuan mencari batu cahaya yang bisa menuntunmu.,
+        choices: [
+          {label: "Membantu peri", target: "batu"},
+          {label: "Terus berjalan sendiri", target: "gagal_peri"}
+        ]
+      },
+      batu: {
+        text: Peri memanggil batu cahaya yang menuntunmu ke air terjun tersembunyi. Di sana kamu menemukan ramuan emas yang menyembuhkan ibumu.,
+        choices: [
+          {label: "Bawa pulang ramuan — Selesai", target: "selesai"}
+        ]
+      },
+      gagal_peri: {
+        text: Tanpa bantuan peri, jalan menjadi penuh jebakan dan kamu kehilangan arah. Kamu pulang tanpa ramuan.,
+        choices: [
+          {label: "Akhiri permainan", target: "gagal"}
+        ]
+      },
+      selesai: {
+        text: Kamu berhasil! Ibumu sembuh, dan desa merayakan keberanianmu. Kamu dikenang sebagai penjelajah Hutan Ajaib.,
+        choices: [
+          {label: "Main lagi", target: "start"}
+        ]
+      },
+      gagal: {
+        text: Perjalanan berakhir tanpa ramuan. Kadang pilihan yang kita buat menentukan nasib—tapi selalu ada kesempatan untuk mencoba lagi.,
+        choices: [
+          {label: "Coba lagi", target: "start"}
+        ]
+      }
+    };
+
+    const sceneEl = document.getElementById('scene');
+    const choiceBox = document.getElementById('choiceBox');
+    const statusEl = document.getElementById('status');
+    const restartBtn = document.getElementById('restart');
+    const autoBtn = document.getElementById('auto');
+
+    let current = 'start';
+    let autoplay = false;
+
+    function renderNode(id){
+      current = id;
+      const node = nodes[id];
+      // Tampilkan teks (bisa dipecah baris)
+      sceneEl.textContent = '';
+      const paragraphs = node.text.split('\n');
+      paragraphs.forEach(p=>{
+        const pEl = document.createElement('p');
+        pEl.style.margin = '0 0 8px 0';
+        pEl.textContent = p;
+        sceneEl.appendChild(pEl);
+      });
+
+      // update status
+      statusEl.textContent = Status: ${id};
+
+      // render pilihan
+      choiceBox.innerHTML = '';
+      node.choices.forEach(ch => {
+        const btn = document.createElement('button');
+        btn.className = 'btn' + (ch.label.toLowerCase().includes('selesai') ? ' primary' : '');
+        btn.textContent = ch.label;
+        btn.onclick = ()=> {
+          renderNode(ch.target);
+        };
+        choiceBox.appendChild(btn);
+      });
+    }
+
+    restartBtn.onclick = ()=> {
+      autoplay = false;
+      autoBtn.textContent = 'Auto';
+      renderNode('start');
+    };
+
+    autoBtn.onclick = ()=> {
+      autoplay = !autoplay;
+      autoBtn.textContent = autoplay ? 'Stop Auto' : 'Auto';
+      if(autoplay) autoPlayFrom(current);
+    };
+
+    function autoPlayFrom(id){
+      if(!autoplay) return;
+      const node = nodes[id];
+      // jika terminal node (hanya pilihan kembali ke start atau selesai), pilih first automatically after short delay
+      setTimeout(()=>{
+        const next = node.choices[0].target;
+        renderNode(next);
+        if(autoplay && next !== 'selesai' && next !== 'gagal') {
+          autoPlayFrom(next);
+        } else if (autoplay && (next === 'selesai' || next === 'gagal')) {
+          // stop autoplay at endings but leave option to restart
+          autoplay = false;
+          autoBtn.textContent = 'Auto';
+        }
+      }, 800);
+    }
+
+    // Mulai permainan
+    renderNode('start');
+  </script>
+</body>
 </html>
-        
