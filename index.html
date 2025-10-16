@@ -1,195 +1,120 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Legenda Hutan Ajaib — Interaktif</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legenda Hutan Ajaib - Cerita Interaktif AI</title>
   <style>
-    :root{
-      --bg:#0f1722; --card:#0b1220; --accent:#7dd3fc; --muted:#94a3b8; --text:#e6eef6;
+    body {
+      background-color: #0f172a;
+      color: #f1f5f9;
+      font-family: "Poppins", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
-      background: radial-gradient(ellipse at top left, #071427 0%, var(--bg) 60%);
-      color:var(--text); display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;
+
+    .card {
+      background-color: #1e293b;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
     }
-    .card{
-      width:100%; max-width:760px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius:14px; box-shadow:0 6px 30px rgba(2,6,23,0.7); padding:20px;
-      border:1px solid rgba(125,211,252,0.06);
+
+    h1 {
+      color: #38bdf8;
+      text-align: center;
     }
-    header{display:flex; align-items:center; gap:12px; margin-bottom:12px}
-    h1{font-size:20px; margin:0}
-    p.lead{margin:0; color:var(--muted); font-size:13px}
-    .story{background:rgba(255,255,255,0.02); padding:18px; border-radius:10px; min-height:180px; margin:14px 0; line-height:1.6}
-    .choices{display:flex; gap:10px; flex-wrap:wrap}
-    .btn{
-      background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text); padding:10px 14px; border-radius:10px;
-      cursor:pointer; font-weight:600; transition:all .15s; min-width:120px; text-align:center;
+
+    button {
+      background-color: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      margin: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
     }
-    .btn:hover{transform:translateY(-3px); box-shadow:0 8px 20px rgba(2,6,23,0.6)}
-    .btn.primary{background:linear-gradient(90deg,var(--accent), #60a5fa); color:#012; border:none}
-    .meta{display:flex; align-items:center; justify-content:space-between; margin-top:14px; color:var(--muted); font-size:13px}
-    @media (max-width:520px){
-      .btn{flex:1; min-width:unset}
+
+    button:hover {
+      background-color: #0ea5e9;
+    }
+
+    .choices {
+      display: flex;
+      justify-content: center;
     }
   </style>
 </head>
 <body>
-  <main class="card" role="application" aria-labelledby="title">
-    <header>
-      <div>
-        <h1 id="title">Legenda Hutan Ajaib</h1>
-        <p class="lead">Petualangan interaktif — pilih jalanmu, lihat akhir ceritanya.</p>
-      </div>
-    </header>
+  <div class="card">
+    <h1>🌳 Legenda Hutan Ajaib 🌟</h1>
+    <p id="story">
+      Kamu adalah <b>Aisyah</b>, seorang gadis muda yang tersesat di hutan saat mencari ramuan penyembuh untuk ibumu yang sakit. 
+      Kabut tebal menyelimuti jalan, dan suara burung malam membuat suasana semakin mencekam.<br><br>
+      Tiba-tiba, kamu melihat dua jalan bercabang.
+    </p>
 
-    <section id="scene" class="story" aria-live="polite"></section>
-
-    <div id="choiceBox" class="choices" role="group" aria-label="Pilihan aksi"></div>
-
-    <div class="meta">
-      <div id="status">Status: Menunggu pilihan...</div>
-      <div>
-        <button id="restart" class="btn" title="Mulai ulang cerita">Restart</button>
-        <button id="auto" class="btn" title="Main otomatis (demo)">Auto</button>
-      </div>
+    <div class="choices" id="choices">
+      <button onclick="choose(1)">1️⃣ Jalan kiri - gua gelap</button>
+      <button onclick="choose(2)">2️⃣ Jalan kanan - cahaya bunga</button>
     </div>
-  </main>
+  </div>
 
   <script>
-    /* Struktur alur cerita: setiap node punya id, teks, dan pilihan (label -> id target) */
-    const nodes = {
-      start: {
-        text: `Kamu adalah Aisyah, seorang gadis yang mencari ramuan penyembuh untuk ibumu.
-Kabut tebal menyelimuti jalan. Di hadapanmu ada dua jalan bercabang.`,
-        choices: [
-          {label: "1. Jalan kiri — ke gua gelap", target: "gua"},
-          {label: "2. Jalan kanan — jalan bercahaya", target: "bercahaya"}
-        ]
-      },
-      gua: {
-        text: Kamu memasuki gua yang lembap. Suara tetesan air mengiringi langkahmu. Di sudut terlihat kotak kayu tertutup.,
-        choices: [
-          {label: "Membuka kotak", target: "peta"},
-          {label: "Mengabaikan dan terus berjalan", target: "gagal_gua"}
-        ]
-      },
-      peta: {
-        text: Di dalam kotak terdapat peta tua yang mengarah ke air terjun tersembunyi. Berbekal peta itu, kamu menemukan ramuan penyembuh.,
-        choices: [
-          {label: "Bawa pulang ramuan — Selesai", target: "selesai"}
-        ]
-      },
-      gagal_gua: {
-        text: Kamu mengabaikan kotak dan tersesat di lorong-lorong gua. Tanpa petunjuk, kamu tak menemukan ramuan dan pulang dengan tangan hampa.,
-             choices: [
-          {label: "Akhiri permainan", target: "gagal"}
-        ]
-      },
-      bercahaya: {
-        text: Di jalan bercahaya, peri kecil bersayap hijau muncul. Ia menawarkan bantuan mencari batu cahaya yang bisa menuntunmu.,
-        choices: [
-          {label: "Membantu peri", target: "batu"},
-          {label: "Terus berjalan sendiri", target: "gagal_peri"}
-        ]
-      },
-      batu: {
-        text: Peri memanggil batu cahaya yang menuntunmu ke air terjun tersembunyi. Di sana kamu menemukan ramuan emas yang menyembuhkan ibumu.,
-        choices: [
-          {label: "Bawa pulang ramuan — Selesai", target: "selesai"}
-        ]
-      },
-      gagal_peri: {
-        text: Tanpa bantuan peri, jalan menjadi penuh jebakan dan kamu kehilangan arah. Kamu pulang tanpa ramuan.,
-        choices: [
-          {label: "Akhiri permainan", target: "gagal"}
-        ]
-      },
-      selesai: {
-        text: Kamu berhasil! Ibumu sembuh, dan desa merayakan keberanianmu. Kamu dikenang sebagai penjelajah Hutan Ajaib.,
-        choices: [
-          {label: "Main lagi", target: "start"}
-        ]
-      },
-      gagal: {
-        text: Perjalanan berakhir tanpa ramuan. Kadang pilihan yang kita buat menentukan nasib—tapi selalu ada kesempatan untuk mencoba lagi.,
-        choices: [
-          {label: "Coba lagi", target: "start"}
-        ]
-      }
-    };
+    let step = 0;
 
-    const sceneEl = document.getElementById('scene');
-    const choiceBox = document.getElementById('choiceBox');
-    const statusEl = document.getElementById('status');
-    const restartBtn = document.getElementById('restart');
-    const autoBtn = document.getElementById('auto');
+    function choose(option) {
+      const story = document.getElementById("story");
+      const choices = document.getElementById("choices");
 
-    let current = 'start';
-    let autoplay = false;
-
-    function renderNode(id){
-      current = id;
-      const node = nodes[id];
-      // Tampilkan teks (bisa dipecah baris)
-      sceneEl.textContent = '';
-      const paragraphs = node.text.split('\n');
-      paragraphs.forEach(p=>{
-        const pEl = document.createElement('p');
-        pEl.style.margin = '0 0 8px 0';
-        pEl.textContent = p;
-        sceneEl.appendChild(pEl);
-      });
-
-      // update status
-      statusEl.textContent = Status: ${id};
-
-      // render pilihan
-      choiceBox.innerHTML = '';
-      node.choices.forEach(ch => {
-        const btn = document.createElement('button');
-        btn.className = 'btn' + (ch.label.toLowerCase().includes('selesai') ? ' primary' : '');
-        btn.textContent = ch.label;
-        btn.onclick = ()=> {
-          renderNode(ch.target);
-        };
-        choiceBox.appendChild(btn);
-      });
-    }
-
-    restartBtn.onclick = ()=> {
-      autoplay = false;
-      autoBtn.textContent = 'Auto';
-      renderNode('start');
-    };
-
-    autoBtn.onclick = ()=> {
-      autoplay = !autoplay;
-      autoBtn.textContent = autoplay ? 'Stop Auto' : 'Auto';
-      if(autoplay) autoPlayFrom(current);
-    };
-
-    function autoPlayFrom(id){
-      if(!autoplay) return;
-      const node = nodes[id];
-      // jika terminal node (hanya pilihan kembali ke start atau selesai), pilih first automatically after short delay
-      setTimeout(()=>{
-        const next = node.choices[0].target;
-        renderNode(next);
-        if(autoplay && next !== 'selesai' && next !== 'gagal') {
-          autoPlayFrom(next);
-        } else if (autoplay && (next === 'selesai' || next === 'gagal')) {
-          // stop autoplay at endings but leave option to restart
-          autoplay = false;
-          autoBtn.textContent = 'Auto';
+      if (step === 0) {
+        if (option === 1) {
+          story.innerHTML = "Kamu masuk ke gua gelap. Di dalamnya kamu mendengar suara air menetes dan melihat batu berkilau.<br><br>Apakah kamu ingin mengambil batu itu?";
+          choices.innerHTML = `
+            <button onclick="choose(3)">1️⃣ Ambil batunya</button>
+            <button onclick="choose(4)">2️⃣ Lewati saja</button>
+          `;
+        } else {
+          story.innerHTML = "Kamu berjalan menuju cahaya bunga. Seekor peri kecil muncul dan berkata:<br><i>'Bantu aku mencari batu cahaya, dan aku akan membantumu!'</i>";
+          choices.innerHTML = `
+            <button onclick="choose(5)">1️⃣ Bantu peri kecil itu</button>
+            <button onclick="choose(6)">2️⃣ Lewati peri dan terus berjalan</button>
+          `;
         }
-      }, 800);
+        step = 1;
+      }
+
+      else if (option === 3) {
+        story.innerHTML = "Kamu mengambil batu itu, dan ternyata itu batu ajaib! Cahaya biru memandumu keluar dari gua dengan selamat.<br><br><b>Tamat — Kamu Menemukan Jalan Cahaya!</b>";
+        choices.innerHTML = <button onclick="restart()">🔄 Main Lagi</button>;
+      }
+
+      else if (option === 4) {
+        story.innerHTML = "Kamu melewati batu itu, tapi jalan menjadi gelap dan kamu tersesat di dalam gua selamanya...<br><br><b>Tamat — Kamu Hilang di Kegelapan.</b>";
+        choices.innerHTML = <button onclick="restart()">🔄 Main Lagi</button>;
+      }
+
+      else if (option === 5) {
+        story.innerHTML = "Kamu membantu peri kecil itu. Sebagai hadiah, ia memberimu batu ajaib yang menuntunmu ke ramuan penyembuh ibumu.<br><br><b>Tamat — Kamu Menjadi Pahlawan Hutan!</b>";
+        choices.innerHTML = <button onclick="restart()">🔄 Main Lagi</button>;
+      }
+
+      else if (option === 6) {
+        story.innerHTML = "Kamu berjalan sendiri dan menemukan jalan buntu. Hutan menjadi sunyi... dan kamu pun tersesat.<br><br><b>Tamat — Akhir yang Misterius.</b>";
+        choices.innerHTML = <button onclick="restart()">🔄 Main Lagi</button>;
+      }
     }
 
-    // Mulai permainan
-    renderNode('start');
+    function restart() {
+      location.reload();
+    }
   </script>
 </body>
 </html>
